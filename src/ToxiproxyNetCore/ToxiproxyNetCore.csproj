@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Version Condition=" '$(APPVEYOR_BUILD_VERSION)' == '' ">0.0.1-local</Version>
+    <Version Condition=" '$(APPVEYOR_BUILD_VERSION)' != '' ">$(APPVEYOR_BUILD_VERSION)</Version>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Toxiproxy.Net</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Authors>adospace</Authors>
+    <Description>Toxiproxy .net standard client.</Description>
+    <Copyright>Adolfo Marinucci</Copyright>
+    <PackageTags>toxiproxy async client</PackageTags>
+    <PackageProjectUrl>https://github.com/adospace/toxiproxy-netcore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/adospace/toxiproxy-netcore</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+  </ItemGroup>
+
+</Project>
