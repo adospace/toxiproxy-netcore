@@ -75,11 +75,11 @@ namespace Toxiproxy.Net
                 CheckIsSuccessStatusCode(response);
 
                 var responseResult = await response.Content.ReadAsStringAsync();
-                var newProxy = JsonConvert.DeserializeObject<Proxy>(responseResult);
+                JsonConvert.PopulateObject(responseResult, proxy);
 
-                newProxy.Client = this;
+                proxy.Client = this;
 
-                return newProxy;
+                return proxy;
             }
         }
 
@@ -105,11 +105,11 @@ namespace Toxiproxy.Net
                 CheckIsSuccessStatusCode(response);
 
                 var responseResult = await response.Content.ReadAsStringAsync();
-                var newProxy = JsonConvert.DeserializeObject<Proxy>(responseResult);
+                JsonConvert.PopulateObject(responseResult, proxy);
 
-                newProxy.Client = this;
+                proxy.Client = this;
 
-                return newProxy;
+                return proxy;
             }
         }
 
