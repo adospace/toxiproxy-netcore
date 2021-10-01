@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Toxiproxy.Net
 {
@@ -6,7 +7,7 @@ namespace Toxiproxy.Net
     /// The class to connect to the ToxiProxy server
     /// </summary>
     /// <seealso cref="System.IDisposable" />
-    public class Connection : IDisposable
+    public class Connection : IDisposable, IAsyncDisposable
     {
         private const int _defaultListeningPort = 8474;
 
@@ -48,7 +49,7 @@ namespace Toxiproxy.Net
         #region IDisposable Support
         private bool _disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual async Task Dispose(bool disposing)
         {
             if (!_disposedValue)
             {
@@ -56,13 +57,12 @@ namespace Toxiproxy.Net
                 {
                     if (_resetAllToxicsAndProxiesOnClose)
                     {
-                        Client().ResetAsync().Wait();
+                        await Client().ResetAsync();
                     }
                 }
 
                     // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                     // TODO: set large fields to null.
-
                     _disposedValue = true;
             }
         }
@@ -78,7 +78,7 @@ namespace Toxiproxy.Net
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
+            Dispose(true).Wait();
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
@@ -91,5 +91,9 @@ namespace Toxiproxy.Net
         //        Client().Reset();
         //    }
         //}
+        public async ValueTask DisposeAsync()
+        {
+            await Dispose(true);
+        }
     }
 }
