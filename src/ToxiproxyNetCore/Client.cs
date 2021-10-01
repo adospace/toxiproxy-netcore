@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
@@ -176,6 +177,54 @@ namespace Toxiproxy.Net
                 CheckIsSuccessStatusCode(response);
             }
         }
+        
+        public Task<List<Proxy>> PopulateAsync(params Proxy[] proxies)
+        {
+            return PopulateAsync(proxies.ToList());
+        }
+        
+        /// <summary>
+        /// Populates the specified proxy to the ToxiProxy server.
+        /// </summary>
+        public async Task<List<Proxy>> PopulateAsync(List<Proxy> proxies)
+        {
+            if (proxies == null)
+            {
+                throw new ArgumentNullException("proxies");
+            }
+
+            using (var httpClient = _clientFactory.Create())
+            {
+                var postPayload = JsonConvert.SerializeObject(proxies);
+                var response = await httpClient.PostAsync("/populate", new StringContent(postPayload, Encoding.UTF8, "application/json"));
+                CheckIsSuccessStatusCode(response);
+
+                var responseResult = await response.Content.ReadAsStringAsync();
+                
+                var proxiesFromServer = JsonConvert.DeserializeObject<ProxyList>(responseResult);
+
+                foreach (var proxy in proxies)
+                {
+                    var matchingProxy = proxiesFromServer.Proxies
+                        .Single(serverProxy => serverProxy.Name == proxy.Name);
+                    
+                    proxy.Client = this;
+                    proxy.Enabled = matchingProxy.Enabled;
+                    proxy.Listen = matchingProxy.Listen;
+                    proxy.Name = matchingProxy.Name;
+                    proxy.Upstream = matchingProxy.Upstream;
+                }
+
+                return proxies;
+
+            }
+        }
+
+        private class ProxyList
+        {
+            public List<Proxy> Proxies { get; set; }
+        }
+        
         #endregion
 
         #region Toxic

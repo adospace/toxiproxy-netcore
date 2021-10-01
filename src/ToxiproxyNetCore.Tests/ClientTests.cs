@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Toxiproxy.Net.Toxics;
 using Xunit;
 
@@ -32,6 +33,57 @@ namespace Toxiproxy.Net.Tests
             Assert.NotNull(proxy);
             Assert.Equal(proxy.Name, ProxyOne.Name);
             Assert.Equal(proxy.Upstream, ProxyOne.Upstream);
+        }
+        
+        [Fact]
+        public async Task CanPopulateProxies()
+        {
+            // Arrange
+            var client = _connection.Client();
+            
+            // Act
+            var proxies = await client.PopulateAsync(ProxyOne, ProxyTwo);
+            
+            // Assert - proxy objects are returned and can be found afterwards
+            Assert.Equal(proxies[0].Name, ProxyOne.Name);
+            Assert.Equal(proxies[1].Name, ProxyTwo.Name);
+            
+            var proxy1 = await client.FindProxyAsync("one");
+            Assert.Equal(proxy1.Name, ProxyOne.Name);
+            Assert.Equal(proxy1.Upstream, ProxyOne.Upstream);
+            
+            var proxy2 = await client.FindProxyAsync("two");
+            Assert.Equal(proxy2.Name, ProxyTwo.Name);
+            Assert.Equal(proxy2.Upstream, ProxyTwo.Upstream);
+        }
+        
+        [Fact]
+        public async Task CanPopulateProxiesMultipleTimes()
+        {
+	        // Arrange
+	        var client = _connection.Client();
+            
+	        // Act - multiple populate calls with overlapping proxies
+	        await client.PopulateAsync(ProxyOne, ProxyTwo);
+	        await client.PopulateAsync(ProxyOne, ProxyTwo);
+	        await client.PopulateAsync(ProxyTwo, ProxyThree);
+            
+	        // Assert - no errors are thrown and 3 proxies exist.
+	        var allProxies = await client.AllAsync();
+	        Assert.Equal(3, allProxies.Keys.Count);
+
+	        // All three proxies are in dictionary
+	        var proxy1 = allProxies[ProxyOne.Name];
+	        Assert.Equal(ProxyOne.Name, proxy1.Name);
+	        Assert.Equal(ProxyOne.Upstream, proxy1.Upstream);
+
+	        var proxy2 = allProxies[ProxyTwo.Name];
+	        Assert.Equal(ProxyTwo.Name, proxy2.Name);
+	        Assert.Equal(ProxyTwo.Upstream, proxy2.Upstream);
+
+	        var proxy3 = allProxies[ProxyThree.Name];
+	        Assert.Equal(ProxyThree.Name, proxy3.Name);
+	        Assert.Equal(ProxyThree.Upstream, proxy3.Upstream);
         }
 
         [Fact]
