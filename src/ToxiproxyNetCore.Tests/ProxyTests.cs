@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Toxiproxy.Net.Toxics;
 using Xunit;
 
@@ -8,7 +9,7 @@ namespace Toxiproxy.Net.Tests
     public class ProxyTests : ToxiproxyTestsBase
     {
         [Fact]
-        public void GetAllToxicsFromAProxyShouldWork()
+        public async Task GetAllToxicsFromAProxyShouldWork()
         {
             // Add two toxics to a proxy and check if they are present in the list
             // of the toxies for the given proxy
@@ -21,7 +22,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            var newProxy = client.AddAsync(proxy).Result;
+            var newProxy = await client.AddAsync(proxy);
 
             var slicerToxic = new SlicerToxic
             {
@@ -31,7 +32,7 @@ namespace Toxiproxy.Net.Tests
             slicerToxic.Attributes.AverageSize = 10;
             slicerToxic.Attributes.Delay = 5;
             slicerToxic.Attributes.SizeVariation = 1;
-            newProxy.AddAsync(slicerToxic).Wait();
+            await newProxy.AddAsync(slicerToxic);
 
             var slowCloseToxic = new SlowCloseToxic
             {
@@ -40,10 +41,10 @@ namespace Toxiproxy.Net.Tests
                 Toxicity = 80
             };
             slowCloseToxic.Attributes.Delay = 50;
-            newProxy.AddAsync(slowCloseToxic).Wait();
+            await newProxy.AddAsync(slowCloseToxic);
 
             // Retrieve the proxy and check the toxics
-            var toxics = newProxy.GetAllToxicsAsync().Result;
+            var toxics = await newProxy.GetAllToxicsAsync();
             Assert.Equal(2, toxics.Count());
 
             var slicerToxicInTheProxy = toxics.OfType<SlicerToxic>().Single();
@@ -60,7 +61,7 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void CreateANewLatencyToxicShouldWork()
+        public async Task CreateANewLatencyToxicShouldWork()
         {
             var client = _connection.Client();
 
@@ -72,7 +73,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            var newProxy = client.AddAsync(proxy).Result;
+            var newProxy = await client.AddAsync(proxy);
 
             var toxic = new LatencyToxic
             {
@@ -81,7 +82,7 @@ namespace Toxiproxy.Net.Tests
             };
             toxic.Attributes.Jitter = 10;
             toxic.Attributes.Latency = 5;
-            var newToxic = newProxy.AddAsync(toxic).Result;
+            var newToxic = await newProxy.AddAsync(toxic);
 
             // Need to retrieve the proxy and check the toxic's values
             Assert.Equal(toxic.Name, newToxic.Name);
@@ -91,7 +92,7 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void CreateANewSlowCloseToxicShouldWork()
+        public async Task CreateANewSlowCloseToxicShouldWork()
         {
             var client = _connection.Client();
 
@@ -103,7 +104,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            var newProxy = client.AddAsync(proxy).Result;
+            var newProxy = await client.AddAsync(proxy);
 
             var toxic = new SlowCloseToxic
             {
@@ -112,7 +113,7 @@ namespace Toxiproxy.Net.Tests
                 Toxicity = 0.5
             };
             toxic.Attributes.Delay = 100;
-            var newToxic = newProxy.AddAsync(toxic).Result;
+            var newToxic = await newProxy.AddAsync(toxic);
 
             // Need to retrieve the proxy and check the toxic's values
             Assert.Equal(toxic.Name, newToxic.Name);
@@ -121,7 +122,7 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void CreateANewTimeoutToxicShouldWork()
+        public async Task CreateANewTimeoutToxicShouldWork()
         {
             var client = _connection.Client();
 
@@ -133,7 +134,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            var newProxy = client.AddAsync(proxy).Result;
+            var newProxy = await client.AddAsync(proxy);
 
             var toxic = new TimeoutToxic
             {
@@ -142,7 +143,7 @@ namespace Toxiproxy.Net.Tests
                 Toxicity = 0.5
             };
             toxic.Attributes.Timeout = 10;
-            var newToxic = newProxy.AddAsync(toxic).Result;
+            var newToxic = await newProxy.AddAsync(toxic);
 
             // Need to retrieve the proxy and check the toxic's values
             Assert.Equal(toxic.Name, newToxic.Name);
@@ -151,7 +152,7 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void CreateANewBandwidthToxicShouldWork()
+        public async Task CreateANewBandwidthToxicShouldWork()
         {
             var client = _connection.Client();
             var proxy = new Proxy
@@ -162,7 +163,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            var newProxy = client.AddAsync(proxy).Result;
+            var newProxy = await client.AddAsync(proxy);
 
             var toxic = new BandwidthToxic
             {
@@ -170,7 +171,7 @@ namespace Toxiproxy.Net.Tests
                 Stream = ToxicDirection.UpStream
             };
             toxic.Attributes.Rate = 100;
-            var newToxic = newProxy.AddAsync(toxic).Result;
+            var newToxic = await newProxy.AddAsync(toxic);
 
             // Need to retrieve the proxy and check the toxic's values
             Assert.Equal(toxic.Name, newToxic.Name);
@@ -179,7 +180,7 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void CreateANewSlicerToxicShouldWork()
+        public async Task CreateANewSlicerToxicShouldWork()
         {
             var client = _connection.Client();
             var proxy = new Proxy
@@ -190,7 +191,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            var newProxy = client.AddAsync(proxy).Result;
+            var newProxy = await client.AddAsync(proxy);
 
             var toxic = new SlicerToxic
             {
@@ -200,7 +201,7 @@ namespace Toxiproxy.Net.Tests
             toxic.Attributes.AverageSize = 10;
             toxic.Attributes.Delay = 5;
             toxic.Attributes.SizeVariation = 1;
-            var newToxic = newProxy.AddAsync(toxic).Result;
+            var newToxic = await newProxy.AddAsync(toxic);
 
             // Need to retrieve the proxy and check the toxic's values
             Assert.Equal(toxic.Name, newToxic.Name);
@@ -211,7 +212,7 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void CreateANewLimitDataToxicShouldWork()
+        public async Task CreateANewLimitDataToxicShouldWork()
         {
             var client = _connection.Client();
             var proxy = new Proxy
@@ -222,7 +223,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            var newProxy = client.AddAsync(proxy).Result;
+            var newProxy = await client.AddAsync(proxy);
 
             var toxic = new LimitDataToxic
             {
@@ -230,7 +231,7 @@ namespace Toxiproxy.Net.Tests
                 Stream = ToxicDirection.UpStream
             };
             toxic.Attributes.Bytes = 512;
-            var newToxic = newProxy.AddAsync(toxic).Result;
+            var newToxic = await newProxy.AddAsync(toxic);
 
             // Need to retrieve the proxy and check the toxic's values
             Assert.Equal(toxic.Name, newToxic.Name);
@@ -239,7 +240,7 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void AddTwoToxicWithTheSameNameShouldThrowException()
+        public async Task AddTwoToxicWithTheSameNameShouldThrowException()
         {
             var client = _connection.Client();
             var proxy = new Proxy
@@ -250,7 +251,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            var newProxy = client.AddAsync(proxy).Result;
+            var newProxy = await client.AddAsync(proxy);
 
             var firstToxic = new SlicerToxic
             {
@@ -260,7 +261,7 @@ namespace Toxiproxy.Net.Tests
             firstToxic.Attributes.AverageSize = 10;
             firstToxic.Attributes.Delay = 5;
             firstToxic.Attributes.SizeVariation = 1;
-            newProxy.AddAsync(firstToxic).Wait();
+            await newProxy.AddAsync(firstToxic);
 
             var toxicWithSameName = new SlicerToxic
             {
@@ -268,12 +269,12 @@ namespace Toxiproxy.Net.Tests
                 Stream = ToxicDirection.UpStream
             };
 
-            Assert.ThrowsAsync<ToxiProxiException>(
-                () => newProxy.AddAsync(toxicWithSameName)).Wait();
+            await Assert.ThrowsAsync<ToxiProxiException>(
+                async () => await newProxy.AddAsync(toxicWithSameName));
         }
 
         [Fact]
-        public void GetAnExistingToxicFromAProxyShouldWork()
+        public async Task GetAnExistingToxicFromAProxyShouldWork()
         {
             // Add a toxics to a proxy.
             // After reload the toxic again and check that all the properties
@@ -287,7 +288,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            proxy = client.AddAsync(proxy).Result;
+            proxy = await client.AddAsync(proxy);
 
             var toxic = new SlicerToxic
             {
@@ -297,10 +298,10 @@ namespace Toxiproxy.Net.Tests
             toxic.Attributes.AverageSize = 10;
             toxic.Attributes.Delay = 5;
             toxic.Attributes.SizeVariation = 1;
-            toxic = proxy.AddAsync(toxic).Result;
+            toxic = await proxy.AddAsync(toxic);
 
             // Reload the toxic and update the properties
-            var toxicInProxy = proxy.GetToxicByNameAsync(toxic.Name).Result;
+            var toxicInProxy = await proxy.GetToxicByNameAsync(toxic.Name);
 
             // Assert
             Assert.Equal(toxicInProxy.Name, toxic.Name);
@@ -313,7 +314,7 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void DeleteAToxicShouldWork()
+        public async Task DeleteAToxicShouldWork()
         {
             // Add two toxics to a proxy.
             // After delete the first one and check that
@@ -327,7 +328,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            var newProxy = client.AddAsync(proxy).Result;
+            var newProxy = await client.AddAsync(proxy);
 
             var firstToxic = new SlicerToxic
             {
@@ -337,7 +338,7 @@ namespace Toxiproxy.Net.Tests
             firstToxic.Attributes.AverageSize = 10;
             firstToxic.Attributes.Delay = 5;
             firstToxic.Attributes.SizeVariation = 1;
-            newProxy.AddAsync(firstToxic).Wait();
+            await newProxy.AddAsync(firstToxic);
 
             var secondToxic = new SlowCloseToxic
             {
@@ -346,14 +347,14 @@ namespace Toxiproxy.Net.Tests
                 Toxicity = 80
             };
             secondToxic.Attributes.Delay = 50;
-            newProxy.AddAsync(secondToxic).Wait();
+            await newProxy.AddAsync(secondToxic);
 
             // Delete the first toxic
-            newProxy.RemoveToxicAsync(firstToxic.Name).Wait();
+            await newProxy.RemoveToxicAsync(firstToxic.Name);
 
             // Retrieve the proxy and check that there is the
             // correct toxics
-            var toxicsInProxy = newProxy.GetAllToxicsAsync().Result;
+            var toxicsInProxy = await newProxy.GetAllToxicsAsync();
             Assert.True(1 == toxicsInProxy.Count());
             Assert.IsType<SlowCloseToxic>(toxicsInProxy.First());
             var singleToxicInProxy = (SlowCloseToxic)toxicsInProxy.First();
@@ -364,7 +365,7 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void UpdatingAToxicShouldWorks()
+        public async Task UpdatingAToxicShouldWorks()
         {
             // Add a toxics to a proxy.
             // After update all the toxic's properties
@@ -379,7 +380,7 @@ namespace Toxiproxy.Net.Tests
                 Upstream = "google.com"
             };
 
-            proxy = client.AddAsync(proxy).Result;
+            proxy = await client.AddAsync(proxy);
 
             var toxic = new SlicerToxic
             {
@@ -389,10 +390,10 @@ namespace Toxiproxy.Net.Tests
             toxic.Attributes.AverageSize = 10;
             toxic.Attributes.Delay = 5;
             toxic.Attributes.SizeVariation = 1;
-            toxic = proxy.AddAsync(toxic).Result;
+            toxic = await proxy.AddAsync(toxic);
 
             // Reload the toxic and update the properties
-            var toxicInProxy = (SlicerToxic)proxy.GetToxicByNameAsync(toxic.Name).Result;
+            var toxicInProxy = (SlicerToxic) await proxy.GetToxicByNameAsync(toxic.Name);
 
             // Update the toxic's property
             toxicInProxy.Name = "NewName";
@@ -400,11 +401,11 @@ namespace Toxiproxy.Net.Tests
             toxicInProxy.Attributes.AverageSize = 20;
             toxicInProxy.Attributes.Delay = 10;
             toxicInProxy.Attributes.SizeVariation = 2;
-            proxy.UpdateToxicAsync(toxic.Name, toxicInProxy).Wait();
+            await proxy.UpdateToxicAsync(toxic.Name, toxicInProxy);
 
             // Reload again (we must use the initial name because the toxic update
             // cannot update the toxic name
-            var updatedToxic = proxy.GetToxicByNameAsync(toxic.Name).Result;
+            var updatedToxic = await proxy.GetToxicByNameAsync(toxic.Name);
 
             // Assert
             // WARNING: By design it's not possible to update the name and the stream properties of the proxy.

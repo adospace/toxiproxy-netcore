@@ -1,11 +1,13 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using ToxiproxyNetCore.Tests.Resources;
+using Xunit;
 
 namespace Toxiproxy.Net.Tests
 {
-    public class ToxiproxyTestsBase : IDisposable
+    public class ToxiproxyTestsBase : IDisposable, IAsyncLifetime
     {
         protected Connection _connection;
         protected Process _process;
@@ -36,33 +38,38 @@ namespace Toxiproxy.Net.Tests
 
         public ToxiproxyTestsBase() 
         {
-            var testFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var targetServerPath = Path.Combine(testFolder, "toxiproxy-server-windows-amd64.exe");
-
-            if (!File.Exists(targetServerPath) || _firstRun)
-            {
-                File.WriteAllBytes(targetServerPath, ResourceLoader.LoadResourceAsByteArray("toxiproxy-server-windows-amd64.exe"));
-            }
-
-            var processInfo = new ProcessStartInfo()
-            {
-                FileName = targetServerPath
-            };
-            _process = new Process()
-            {
-                StartInfo = processInfo
-            };
-            _process.Start();
+            _connection = new Connection(resetAllToxicsAndProxiesOnClose: true);
             
-            _connection = new Connection();
+            _connection.Client().ResetAsync().Wait();
+            var proxies = _connection.Client().AllAsync().GetAwaiter().GetResult();
+            foreach (var proxy in proxies)
+            {
+                proxy.Value.DeleteAsync().GetAwaiter().GetResult();
+            }
+            
         }
 
         public void Dispose()
         {
-            if (_process.HasExited == false)
+            _connection?.Dispose();
+        }
+
+        public async Task InitializeAsync()
+        {
+            _connection = new Connection(resetAllToxicsAndProxiesOnClose: true);
+
+            await _connection.Client().ResetAsync();
+            var proxies = await _connection.Client().AllAsync();
+            foreach (var proxy in proxies)
             {
-                _process.Kill();
+                proxy.Value.DeleteAsync().GetAwaiter().GetResult();
             }
+        }
+
+        public Task DisposeAsync()
+        {
+            _connection?.Dispose();
+            return Task.CompletedTask;
         }
     }
 }

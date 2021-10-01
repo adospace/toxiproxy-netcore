@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Toxiproxy.Net.Tests
@@ -22,16 +23,16 @@ namespace Toxiproxy.Net.Tests
         }
 
         [Fact]
-        public void DisposeEnablesAndResetsAllProxies()
+        public async Task DisposeEnablesAndResetsAllProxies()
         {
             var connection = new Connection(resetAllToxicsAndProxiesOnClose: true);
 
             var client = connection.Client();
-            client.AddAsync(ProxyOne).Wait();
+            await client.AddAsync(ProxyOne);
 
             var proxy = client.FindProxyAsync(ProxyOne.Name).Result;
             proxy.Enabled = false;
-            proxy.UpdateAsync().Wait();
+            await proxy.UpdateAsync();
 
             connection.Dispose();
 

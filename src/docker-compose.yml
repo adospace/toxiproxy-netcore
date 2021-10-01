@@ -1,0 +1,4 @@
+services:
+  toxiproxi:
+    network_mode: "host"
+    image: ghcr.io/shopify/toxiproxy
