@@ -10,7 +10,6 @@ namespace Toxiproxy.Net.Tests
     public class ToxiproxyTestsBase : IDisposable, IAsyncLifetime
     {
         protected Connection _connection;
-        protected Process _process;
 
         protected readonly Proxy ProxyOne = new Proxy
         {
@@ -33,8 +32,6 @@ namespace Toxiproxy.Net.Tests
             Listen = "127.0.0.1:33333",
             Upstream = "three.com"
         };
-
-        private bool _firstRun = false;
 
         public ToxiproxyTestsBase() 
         {
