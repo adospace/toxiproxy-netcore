@@ -1,4 +1,5 @@
 services:
   toxiproxi:
-    network_mode: "host"
     image: ghcr.io/shopify/toxiproxy
+    ports:
+      - "8474:8474"
