@@ -1,0 +1,6 @@
+version: "3.1"
+services:
+  toxiproxi:
+    image: ghcr.io/shopify/toxiproxy
+    ports:
+      - "8474:8474"
