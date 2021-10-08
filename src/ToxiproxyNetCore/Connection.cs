@@ -17,7 +17,7 @@ namespace Toxiproxy.Net
         private readonly bool _resetAllToxicsAndProxiesOnClose;
         
         public Connection(bool resetAllToxicsAndProxiesOnClose = false)
-            : this("localhost", resetAllToxicsAndProxiesOnClose)
+            : this("127.0.0.1", resetAllToxicsAndProxiesOnClose)
         {
             // Nothing here   
         }

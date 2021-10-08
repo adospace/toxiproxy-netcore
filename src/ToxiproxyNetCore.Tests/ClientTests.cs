@@ -86,7 +86,7 @@ namespace Toxiproxy.Net.Tests
             // Retrieve the proxy and update the proxy
             var proxyToUpdate = client.FindProxyAsync(ProxyOne.Name).Result;
             proxyToUpdate.Enabled = false;
-            proxyToUpdate.Listen = "localhost:55555";
+            proxyToUpdate.Listen = "127.0.0.1:55555";
             proxyToUpdate.Upstream = "google.com";
             await client.UpdateAsync(proxyToUpdate);
 
