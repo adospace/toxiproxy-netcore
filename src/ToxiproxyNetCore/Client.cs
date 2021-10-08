@@ -369,6 +369,9 @@ namespace Toxiproxy.Net
                     default:
                         var errorContent = response.Content.ReadAsStringAsync().Result;
                         var error = JsonConvert.DeserializeObject<ToxiProxiErrorMessage>(errorContent);
+                        // todo remove
+                        Console.WriteLine(errorContent);
+                        Console.WriteLine(error);
                         throw new ToxiProxiException("An error occurred: " + error.title);
                 }
             }
