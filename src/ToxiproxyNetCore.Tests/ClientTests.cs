@@ -26,9 +26,9 @@ namespace Toxiproxy.Net.Tests
             await client.AddAsync(ProxyOne);
 
             // Retrieve the proxy
-            var proxy = client.FindProxyAsync("one").Result;
+            var proxy = await client.FindProxyAsync("one");
             
-            // Check if it the corerct one
+            // Check if it the correct one
             Assert.NotNull(proxy);
             Assert.Equal(proxy.Name, ProxyOne.Name);
             Assert.Equal(proxy.Upstream, ProxyOne.Upstream);
@@ -43,15 +43,13 @@ namespace Toxiproxy.Net.Tests
             await client.AddAsync(ProxyTwo);
 
             // Retrieve all the proxies
-            var all = client.AllAsync().Result;
+            var all = await client.AllAsync();
 
             // Check if there are two proxies
             Assert.Equal(2, all.Keys.Count);
             // Check if contains the correct proxies
-            var containsProxyOne = all.Keys.Contains(ProxyOne.Name);
-            Assert.True(containsProxyOne);
-            _ = all.Keys.Contains(ProxyTwo.Name);
-            Assert.True(containsProxyOne);
+            Assert.True(all.ContainsKey(ProxyOne.Name));
+            Assert.True(all.ContainsKey(ProxyTwo.Name));
         }
 
         [Fact]
@@ -68,11 +66,11 @@ namespace Toxiproxy.Net.Tests
             await client.DeleteAsync(ProxyTwo.Name);
 
             // The client should contain only a proxy
-            var all = client.AllAsync().Result;
+            var all = await client.AllAsync();
             Assert.Equal(1, all.Keys.Count);
 
             // The single proxy in the collection should be the 3th proxy
-            var containsProxyThree = all.Keys.Contains(ProxyThree.Name);
+            var containsProxyThree = all.ContainsKey(ProxyThree.Name);
             Assert.True(containsProxyThree);
         }
 
@@ -84,14 +82,14 @@ namespace Toxiproxy.Net.Tests
             await client.AddAsync(ProxyOne);
 
             // Retrieve the proxy and update the proxy
-            var proxyToUpdate = client.FindProxyAsync(ProxyOne.Name).Result;
+            var proxyToUpdate = await client.FindProxyAsync(ProxyOne.Name);
             proxyToUpdate.Enabled = false;
             proxyToUpdate.Listen = "127.0.0.1:55555";
             proxyToUpdate.Upstream = "google.com";
             await client.UpdateAsync(proxyToUpdate);
 
             // Retrieve the proxy and check if the parameters are correctly updated
-            var proxyUpdated = client.FindProxyAsync(proxyToUpdate.Name).Result;
+            var proxyUpdated = await client.FindProxyAsync(proxyToUpdate.Name);
 
             Assert.Equal(proxyToUpdate.Enabled, proxyUpdated.Enabled);
             Assert.Equal(proxyToUpdate.Listen, proxyUpdated.Listen);
@@ -108,8 +106,8 @@ namespace Toxiproxy.Net.Tests
             // Reset
             await client.ResetAsync();
 
-            // Retrive the proxy
-            var proxyCopy = client.FindProxyAsync(ProxyOne.Name).Result;
+            // Retrieve the proxy
+            var proxyCopy = await client.FindProxyAsync(ProxyOne.Name);
 
             // The proxy should be enabled
             Assert.True(proxyCopy.Enabled);
@@ -127,7 +125,7 @@ namespace Toxiproxy.Net.Tests
         public async Task CreateANewProxyShouldWork()
         {
             var client = _connection.Client();
-            var newProxy = client.AddAsync(ProxyOne).Result;
+            var newProxy = await client.AddAsync(ProxyOne);
 
             Assert.Equal(ProxyOne.Name, newProxy.Name);
             Assert.Equal(ProxyOne.Enabled, newProxy.Enabled);
@@ -141,11 +139,11 @@ namespace Toxiproxy.Net.Tests
             // Add a proxy and check it exists
             var client = _connection.Client();
             await client.AddAsync(ProxyOne);
-            var proxy = client.FindProxyAsync(ProxyOne.Name).Result;
+            var proxy = await client.FindProxyAsync(ProxyOne.Name);    
 
             // deleting is not idemnepotent and should throw exception
             await proxy.DeleteAsync();
-            var exception = Assert.ThrowsAsync<ToxiProxiException>(() => proxy.DeleteAsync()).Result;
+            var exception = await Assert.ThrowsAsync<ToxiProxiException>(async () => await proxy.DeleteAsync());
             Assert.Equal("Not found", exception.Message);
         }
 
@@ -155,7 +153,7 @@ namespace Toxiproxy.Net.Tests
             // Add a proxy and check it exists
             var client = _connection.Client();
             await client.AddAsync(ProxyOne);
-            var proxy = client.FindProxyAsync(ProxyOne.Name).Result;
+            var proxy = await client.FindProxyAsync(ProxyOne.Name);
 
             // delete
             await proxy.DeleteAsync();
@@ -172,14 +170,14 @@ namespace Toxiproxy.Net.Tests
 			await client.AddAsync( ProxyOne );
 
 			// Retrieve the proxy
-			var proxy = client.FindProxyAsync( "one" ).Result;
+			var proxy = await client.FindProxyAsync("one");
 			var latencyToxic = new LatencyToxic();
 			latencyToxic.Attributes.Latency = 1000;
 
 			await proxy.AddAsync( latencyToxic );
 			await proxy.UpdateAsync();
 
-			var toxics = proxy.GetAllToxicsAsync().Result;
+			var toxics = await proxy.GetAllToxicsAsync();
 			Assert.True(toxics.Count() == 1);
 			var toxic = toxics.First();
 
@@ -197,7 +195,7 @@ namespace Toxiproxy.Net.Tests
 			await client.AddAsync( ProxyOne );
 
 			// Retrieve the proxy
-			var proxy = client.FindProxyAsync( "one" ).Result;
+			var proxy = await client.FindProxyAsync( "one" );
 
 			var latencyToxic = new LatencyToxic();
 			latencyToxic.Attributes.Latency = 1000;
@@ -208,7 +206,7 @@ namespace Toxiproxy.Net.Tests
 			await proxy.AddAsync( latencyToxic );
 			await proxy.UpdateAsync();
 
-			var toxics = proxy.GetAllToxicsAsync().Result;
+			var toxics = await proxy.GetAllToxicsAsync();
 			Assert.True(toxics.Count() == 1);
 			var toxic = toxics.First();
 
