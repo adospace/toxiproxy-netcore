@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Toxiproxy.Net;
 using Xunit;
@@ -14,21 +13,15 @@ namespace ToxiproxyNetCore.Tests
         public Client Client => _connection.Client();
         
 
-        public ConnectionFixture()
-        {
-            _process = new Process
-            {
-                StartInfo = new ProcessStartInfo { FileName = @"./toxiproxy-server.exe" }
-            };
-
-            _process.Start();
-            Thread.Sleep(500);
-            _connection = new Connection(resetAllToxicsAndProxiesOnClose: true);
-        }
-
         public async Task InitializeAsync()
         {
-            await ResetConnection();
+            /*_process = new Process
+           {
+               StartInfo = new ProcessStartInfo { FileName = @"./toxiproxy-server.exe" }
+           };
+
+           _process.Start();*/
+            await Task.Delay(500);
         }
 
         public async Task ResetConnection()
