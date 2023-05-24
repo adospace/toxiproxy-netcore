@@ -28,9 +28,6 @@ namespace Toxiproxy.Net.Toxics
 
         public ToxicAttributes Attributes { get; set; }
 
-        public override string Type
-        {
-            get { return ToxicTypenames.SlicerToxic; }
-        }
+        public override string Type => ToxicTypenames.SlicerToxic;
     }
 }

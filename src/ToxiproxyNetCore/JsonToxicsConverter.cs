@@ -20,7 +20,7 @@ namespace Toxiproxy.Net
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var jsonObject = JObject.Load(reader);
-            var typeName = jsonObject["type"].ToString();
+            var typeName = jsonObject["type"]?.ToString();
             switch (typeName)
             {
                 case ToxicTypenames.LatencyToxic:

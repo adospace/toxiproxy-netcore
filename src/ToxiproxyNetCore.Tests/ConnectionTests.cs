@@ -1,25 +1,19 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Toxiproxy.Net;
 using Xunit;
 
-namespace Toxiproxy.Net.Tests
+namespace ToxiproxyNetCore.Tests
 {
     [Collection("Integration")]
     public class ConnectionTests : ToxiproxyTestsBase
     {
+        public ConnectionTests(ConnectionFixture fixture) : base(fixture) { }
         [Fact]
         public void ErrorThrownIfHostIsNullOrEmpty()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                var connection = new Connection("");
-
-            });
-
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                var connection = new Connection(null);
-            });
+            Assert.Throws<ArgumentNullException>(() => new Connection(""));
+            Assert.Throws<ArgumentNullException>(() => new Connection(null));
         }
 
         [Fact]
@@ -28,15 +22,16 @@ namespace Toxiproxy.Net.Tests
             var connection = new Connection(resetAllToxicsAndProxiesOnClose: true);
 
             var client = connection.Client();
-            await client.AddAsync(ProxyOne);
+            await client.AddAsync(TestProxy.One);
 
-            var proxy = client.FindProxyAsync(ProxyOne.Name).Result;
+
+            var proxy = await client.FindProxyAsync(TestProxy.One.Name);
             proxy.Enabled = false;
             await proxy.UpdateAsync();
 
             connection.Dispose();
 
-            var proxyCopy = client.FindProxyAsync(ProxyOne.Name).Result;
+            var proxyCopy = await client.FindProxyAsync(TestProxy.One.Name);
             Assert.True(proxyCopy.Enabled);
         }
     }

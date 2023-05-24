@@ -20,9 +20,6 @@
 
         public ToxicAttributes Attributes { get; set; }
 
-        public override string Type
-        {
-            get { return ToxicTypenames.TimeoutToxic; }
-        }
+        public override string Type => ToxicTypenames.TimeoutToxic;
     }
 }

@@ -20,9 +20,6 @@
 
         public ToxicAttributes Attributes { get; set; }
 
-        public override string Type
-        {
-            get { return ToxicTypenames.SlowCloseToxic; }
-        }
+        public override string Type => ToxicTypenames.SlowCloseToxic;
     }
 }
