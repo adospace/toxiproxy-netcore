@@ -29,34 +29,32 @@ namespace Toxiproxy.Net
         {
             if (string.IsNullOrEmpty(host))
             {
-                throw new ArgumentNullException("host");
+                throw new ArgumentNullException(nameof(host));
             }
             _resetAllToxicsAndProxiesOnClose = resetAllToxicsAndProxiesOnClose;
             _clientFactory = new HttpClientFactory(new Uri($"http://{host}:{port}"));
         }
 
-        public Client Client() => new (_clientFactory);
+        public Client Client() => new Client(_clientFactory);
 
         #region IDisposable Support
         private bool _disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (_disposedValue)
             {
-                if (disposing)
-                {
-                    if (_resetAllToxicsAndProxiesOnClose)
-                    {
-                        Client().ResetAsync().Wait();
-                    }
-                }
-
-                    // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                    // TODO: set large fields to null.
-
-                    _disposedValue = true;
+                return;
             }
+            if (disposing && _resetAllToxicsAndProxiesOnClose)
+            {
+                Client().ResetAsync().Wait();
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+            // TODO: set large fields to null.
+
+            _disposedValue = true;
         }
 
         // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.

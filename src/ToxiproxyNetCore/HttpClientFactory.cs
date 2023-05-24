@@ -9,22 +9,17 @@ namespace Toxiproxy.Net
     /// <seealso cref="Toxiproxy.Net.IHttpClientFactory" />
     internal class HttpClientFactory : IHttpClientFactory
     {
-        private readonly Uri _baseUrl;
 
         public HttpClientFactory(Uri baseUrl)
         {
-            _baseUrl = baseUrl;
+            BaseUrl = baseUrl;
         }
 
-        public Uri BaseUrl
-        {
-            get { return _baseUrl; }
-        }
+        public Uri BaseUrl { get; }
 
-        public HttpClient Create()
+    public HttpClient Create()
         {
-            var client = new HttpClient();
-            client.BaseAddress = _baseUrl;
+            var client = new HttpClient { BaseAddress = BaseUrl };
             client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             return client;
         }

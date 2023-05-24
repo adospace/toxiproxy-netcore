@@ -33,15 +33,15 @@ namespace ToxiproxyNetCore.Tests
             await Task.WhenAll(proxies.Select(proxy => proxy.Value.DeleteAsync()));
         }
 
-        public async Task DisposeAsync()
-        {
-            Dispose();
-        }
+        public async Task DisposeAsync() => await Task.Run(Dispose);
+        
+
+        public void DisposeConnection() => _connection?.Dispose();
 
 
         public void Dispose()
         {
-            _connection.Dispose();
+            DisposeConnection();
             _process?.Kill();
         }
     }
