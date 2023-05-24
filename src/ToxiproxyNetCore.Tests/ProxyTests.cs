@@ -1,19 +1,22 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Toxiproxy.Net;
 using Toxiproxy.Net.Toxics;
 using Xunit;
 
-namespace Toxiproxy.Net.Tests
+namespace ToxiproxyNetCore.Tests
 {
     [Collection("Integration")]
     public class ProxyTests : ToxiproxyTestsBase
     {
+        public ProxyTests(ConnectionFixture fixture) : base(fixture) { }
+
         [Fact]
         public async Task GetAllToxicsFromAProxyShouldWork()
         {
             // Add two toxics to a proxy and check if they are present in the list
             // of the toxies for the given proxy
-            var client = _connection.Client();
+            var client = Fixture.Client;
             var proxy = new Proxy
             {
                 Name = "testingProxy",
@@ -63,7 +66,7 @@ namespace Toxiproxy.Net.Tests
         [Fact]
         public async Task CreateANewLatencyToxicShouldWork()
         {
-            var client = _connection.Client();
+            var client = Fixture.Client;
 
             var proxy = new Proxy
             {
@@ -94,7 +97,7 @@ namespace Toxiproxy.Net.Tests
         [Fact]
         public async Task CreateANewSlowCloseToxicShouldWork()
         {
-            var client = _connection.Client();
+            var client = Fixture.Client;
 
             var proxy = new Proxy
             {
@@ -124,7 +127,7 @@ namespace Toxiproxy.Net.Tests
         [Fact]
         public async Task CreateANewTimeoutToxicShouldWork()
         {
-            var client = _connection.Client();
+            var client = Fixture.Client;
 
             var proxy = new Proxy
             {
@@ -154,7 +157,7 @@ namespace Toxiproxy.Net.Tests
         [Fact]
         public async Task CreateANewBandwidthToxicShouldWork()
         {
-            var client = _connection.Client();
+            var client = Fixture.Client;
             var proxy = new Proxy
             {
                 Name = "testingProxy",
@@ -182,7 +185,7 @@ namespace Toxiproxy.Net.Tests
         [Fact]
         public async Task CreateANewSlicerToxicShouldWork()
         {
-            var client = _connection.Client();
+            var client = Fixture.Client;
             var proxy = new Proxy
             {
                 Name = "testingProxy",
@@ -214,7 +217,7 @@ namespace Toxiproxy.Net.Tests
         [Fact]
         public async Task CreateANewLimitDataToxicShouldWork()
         {
-            var client = _connection.Client();
+            var client = Fixture.Client;
             var proxy = new Proxy
             {
                 Name = "testingProxy",
@@ -242,7 +245,7 @@ namespace Toxiproxy.Net.Tests
         [Fact]
         public async Task AddTwoToxicWithTheSameNameShouldThrowException()
         {
-            var client = _connection.Client();
+            var client = Fixture.Client;
             var proxy = new Proxy
             {
                 Name = "testingProxy",
@@ -279,7 +282,7 @@ namespace Toxiproxy.Net.Tests
             // Add a toxics to a proxy.
             // After reload the toxic again and check that all the properties
             // are correctly saved 
-            var client = _connection.Client();
+            var client = Fixture.Client;
             var proxy = new Proxy
             {
                 Name = "testingProxy",
@@ -319,7 +322,7 @@ namespace Toxiproxy.Net.Tests
             // Add two toxics to a proxy.
             // After delete the first one and check that
             // there is still the second toxic in the proxy
-            var client = _connection.Client();
+            var client = Fixture.Client;
             var proxy = new Proxy
             {
                 Name = "testingProxy",
@@ -371,7 +374,7 @@ namespace Toxiproxy.Net.Tests
             // After update all the toxic's properties
             // Reload the toxic again and check that all the properties
             // are correctly updated 
-            var client = _connection.Client();
+            var client = Fixture.Client;
             var proxy = new Proxy
             {
                 Name = "testingProxy",
