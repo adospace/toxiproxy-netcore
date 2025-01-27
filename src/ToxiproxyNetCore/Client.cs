@@ -100,7 +100,7 @@ namespace Toxiproxy.Net
             {
                 var url = $"/proxies/{proxy.Name}";
                 var postPayload = JsonConvert.SerializeObject(proxy);
-                var response = await httpClient.PostAsync(url, new StringContent(postPayload, Encoding.UTF8, "application/json"));
+                var response = await httpClient.PatchAsync(url, new StringContent(postPayload, Encoding.UTF8, "application/json"));
 
                 await CheckIsSuccessStatusCode(response);
 
@@ -242,12 +242,12 @@ namespace Toxiproxy.Net
             using (var client = _clientFactory.Create())
             {
                 var url = $"proxies/{proxy.Name}/toxics";
-				var objectSerialized = JsonConvert.SerializeObject( 
-						toxic, 
-						new JsonSerializerSettings {
-							NullValueHandling = NullValueHandling.Ignore
-						} 
-					);
+                var objectSerialized = JsonConvert.SerializeObject( 
+                        toxic, 
+                        new JsonSerializerSettings {
+                            NullValueHandling = NullValueHandling.Ignore
+                        } 
+                    );
 
                 var response = await client.PostAsync(url, new StringContent(objectSerialized, Encoding.UTF8, "application/json"));
 
@@ -328,7 +328,7 @@ namespace Toxiproxy.Net
             {
                 var url = $"/proxies/{proxyName}/toxics/{existingToxicName}";
                 var objectSerialized = JsonConvert.SerializeObject(toxic);
-                var response = await client.PostAsync(url, new StringContent(objectSerialized, Encoding.UTF8, "application/json"));
+                var response = await client.PatchAsync(url, new StringContent(objectSerialized, Encoding.UTF8, "application/json"));
 
                 await CheckIsSuccessStatusCode(response);
 
