@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -403,14 +404,23 @@ namespace Toxiproxy.Net
         /// <summary>
         /// Get the Toxiproxy server version calling the dedicated endpoint.
         /// </summary>
-        /// <returns>The server version as <see cref="Version"/> object.</returns>
+        /// <returns>The server version number.</returns>
         private async Task<string> GetServerVersionAsync()
         {
             using (var httpClient = _clientFactory.Create())
             {
                 var response = await httpClient.GetAsync("/version");
                 await CheckIsSuccessStatusCode(response);
-                return await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync();
+
+                try
+                {
+                    return ((string)JObject.Parse(content)["version"]).Trim();
+                }
+                catch (JsonReaderException)
+                {
+                    return content;
+                }
             }
         }
 
