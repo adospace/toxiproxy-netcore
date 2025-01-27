@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
-using Newtonsoft.Json;
-using System.Net;
-using Toxiproxy.Net.Toxics;
 using System.Threading.Tasks;
+using Toxiproxy.Net.Toxics;
 
 namespace Toxiproxy.Net
 {
@@ -16,10 +17,12 @@ namespace Toxiproxy.Net
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly JsonConverter[] _deserializeConverter = { new JsonToxicsConverter() };
+        private readonly Lazy<Task<string>> _serverVersion;
 
         public Client(IHttpClientFactory clientFactory)
         {
             _clientFactory = clientFactory;
+            _serverVersion = new Lazy<Task<string>>(GetServerVersionAsync);
         }
 
         public async Task<IDictionary<string, Proxy>> AllAsync()
@@ -100,7 +103,15 @@ namespace Toxiproxy.Net
             {
                 var url = $"/proxies/{proxy.Name}";
                 var postPayload = JsonConvert.SerializeObject(proxy);
-                var response = await httpClient.PostAsync(url, new StringContent(postPayload, Encoding.UTF8, "application/json"));
+                HttpResponseMessage response;
+                if (await ServerSupportsHttpPatchForProxyUpdates())
+                {
+                    response = await httpClient.PatchAsync(url, new StringContent(postPayload, Encoding.UTF8, "application/json"));
+                }
+                else
+                {
+                    response = await httpClient.PostAsync(url, new StringContent(postPayload, Encoding.UTF8, "application/json"));
+                }
 
                 await CheckIsSuccessStatusCode(response);
 
@@ -242,12 +253,12 @@ namespace Toxiproxy.Net
             using (var client = _clientFactory.Create())
             {
                 var url = $"proxies/{proxy.Name}/toxics";
-				var objectSerialized = JsonConvert.SerializeObject( 
-						toxic, 
-						new JsonSerializerSettings {
-							NullValueHandling = NullValueHandling.Ignore
-						} 
-					);
+                var objectSerialized = JsonConvert.SerializeObject( 
+                        toxic, 
+                        new JsonSerializerSettings {
+                            NullValueHandling = NullValueHandling.Ignore
+                        } 
+                    );
 
                 var response = await client.PostAsync(url, new StringContent(objectSerialized, Encoding.UTF8, "application/json"));
 
@@ -323,12 +334,20 @@ namespace Toxiproxy.Net
             {
                 throw new ArgumentNullException(nameof(toxic));
             }
-
+            
             using (var client = _clientFactory.Create())
             {
                 var url = $"/proxies/{proxyName}/toxics/{existingToxicName}";
                 var objectSerialized = JsonConvert.SerializeObject(toxic);
-                var response = await client.PostAsync(url, new StringContent(objectSerialized, Encoding.UTF8, "application/json"));
+                HttpResponseMessage response;
+                if (await ServerSupportsHttpPatchForProxyUpdates())
+                {
+                    response = await client.PatchAsync(url, new StringContent(objectSerialized, Encoding.UTF8, "application/json"));
+                }
+                else
+                {
+                    response = await client.PostAsync(url, new StringContent(objectSerialized, Encoding.UTF8, "application/json"));
+                }
 
                 await CheckIsSuccessStatusCode(response);
 
@@ -371,7 +390,54 @@ namespace Toxiproxy.Net
                     var error = JsonConvert.DeserializeObject<ToxiProxiErrorMessage>(errorContent);
                     throw new ToxiProxiException("An error occurred: " + error.title);
             }
-            
+        }
+
+        /// <summary>
+        /// Get the Toxiproxy server version.
+        /// </summary>
+        /// <returns>The Toxiproxy server version.</returns>
+        public Task<string> VersionAsync()
+        {
+            return _serverVersion.Value;
+        }
+
+        /// <summary>
+        /// Get the Toxiproxy server version calling the dedicated endpoint.
+        /// </summary>
+        /// <returns>The server version number.</returns>
+        private async Task<string> GetServerVersionAsync()
+        {
+            using (var httpClient = _clientFactory.Create())
+            {
+                var response = await httpClient.GetAsync("/version");
+                await CheckIsSuccessStatusCode(response);
+                var content = await response.Content.ReadAsStringAsync();
+
+                try
+                {
+                    return ((string)JObject.Parse(content)["version"]).Trim();
+                }
+                catch (JsonReaderException)
+                {
+                    return content;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Starting from version 2.6.0, Toxiproxy server supports HTTP PATCH method for proxy updates, 
+        /// and started deprecating updates using HTTP POST.
+        /// This method helps checking the server version so to allow using the preferred update HTTP method 
+        /// according to the server version, so we can support both ways without breaking.
+        /// <see href="https://github.com/Shopify/toxiproxy/blob/main/CHANGELOG.md#260---2023-08-22">See Toxiproxy changelog.</see>
+        /// </summary>
+        /// <returns><see cref="true"/> if server version is 2.6.0 or above.</returns>
+        private async Task<bool> ServerSupportsHttpPatchForProxyUpdates()
+        {
+            Version supportsPatchMethodForUpdates = new Version("2.6.0");
+
+            var serverVersion = new Version(await _serverVersion.Value);
+            return !(serverVersion.CompareTo(supportsPatchMethodForUpdates) < 0);
         }
     }
 }
