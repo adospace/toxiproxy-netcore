@@ -218,5 +218,13 @@ namespace ToxiproxyNetCore.Tests
             //default pattern is <type>_<stream>
             Assert.Equal("testName", toxic.Name);
         }
+
+        [Fact]
+        public async Task GetServerVersion()
+        {
+            var version = await Fixture.Client.VersionAsync();
+            Assert.NotNull(version);
+            Assert.NotEmpty(version);
+        }
     }
 }
